@@ -1,5 +1,6 @@
 CREATE TABLE all_vehicles(
-  	date DATE PRIMARY KEY,
+	unique_id INT PRIMARY KEY,
+  	date DATE,
 	day INTEGER,
 	month INTEGER,
 	year INTEGER,
@@ -36,3 +37,30 @@ CREATE TABLE counts(
 	count_encoded INT PRIMARY KEY,
 	count_group VARCHAR
 	);
+
+CREATE TABLE weather(
+	date DATE PRIMARY KEY,
+	maxtemp INTEGER,
+	atemp INTEGER,
+	mintemp INTEGER,
+	maxhum INTEGER,
+	ahum INTEGER,
+	maxwind INTEGER,
+	awind INTEGER,
+	minwind INTEGER,
+	prec INTEGER,
+	day INTEGER,
+	month INTEGER,
+	day_of_week INTEGER,
+	year INTEGER
+	);
+
+
+
+
+select round(avg(atemp),0) AS atemp,
+	round(avg(ahum),0) AS ahum,
+	round(avg(awind),0) AS awind,
+	round(avg(prec),0) AS prec
+from weather
+where day = '1' and month = '1'
