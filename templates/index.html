@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Austin Micromobility</title>
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+  <!-- Our CSS -->
+  <link rel="stylesheet" type="text/css" href="static/style.css">
+  <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+</head>
+
+<body>
+  <div class="meta">
+  <h2>Scooter and Bicycle Demand</h2>
+  <p>This trained machine learning model is made available to predict
+    the demand for a bike or scooter. The model is <b>93%</b> accurate. Enjoy!</p>
+  </div>
+  <div class="form">
+    <form action="/result" method="POST">
+      <div class="label">
+        <label for="day">Day (between 1 and 31)</label>
+        <input type="text" id="day" name="day">
+        <br>
+      </div>
+      <div class="label">
+        <label for="dow">Day of Week</label>
+        <select id="dow" name="dow">
+          <option value="0">Sunday</option>
+          <option value="1">Monday</option>
+          <option value="2">Tuesday</option>
+          <option value="3">Wednesday</option>
+          <option value="4">Thursday</option>
+          <option value="5">Friday</option>
+          <option value="6">Saturday</option>
+        </select>
+        <br>
+      </div>
+      <div class="label">
+        <label for="month">Month</label>
+        <select id="month" name="month">
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5">May</option>
+          <option value="6">June</option>
+          <option value="7">July</option>
+          <option value="8">August</option>
+          <option value="9">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+        <br>
+      </div>
+      <div class="label">
+        <label for="year">Year</label>
+        <select id="year" name="year">
+          <option value="2018">2018</option>
+          <option value="2019">2019</option>
+        </select>
+        <br>
+      </div>
+      <div class="label">
+        <label for="hour">Hour</label>
+        <select id="hour" name="hour">
+          <option value="0">Midnight</option>
+          <option value="1">1:00 AM</option>
+          <option value="2">2:00 AM</option>
+          <option value="3">3:00 AM</option>
+          <option value="4">4:00 AM</option>
+          <option value="5">5:00 AM</option>
+          <option value="6">6:00 AM</option>
+          <option value="7">7:00 AM</option>
+          <option value="8">8:00 AM</option>
+          <option value="9">9:00 AM</option>
+          <option value="10">10:00 AM</option>
+          <option value="11">11:00 AM</option>
+          <option value="12">12:00 PM</option>
+          <option value="13">1:00 PM</option>
+          <option value="14">2:00 PM</option>
+          <option value="15">3:00 PM</option>
+          <option value="16">4:00 PM</option>
+          <option value="17">5:00 PM</option>
+          <option value="18">6:00 PM</option>
+          <option value="19">7:00 PM</option>
+          <option value="20">8:00 PM</option>
+          <option value="21">9:00 PM</option>
+          <option value="22">10:00 PM</option>
+          <option value="23">11:00 PM</option>
+          </select>
+          <br>
+      </div>
+      <div class="label">
+        <label for="atemp">Average Temperature (between 34 and 110)</label>
+        <input type="text" id="atemp" name="atemp">
+        <br>
+      </div>
+      <div class="label">
+        <label for="ahum">Average Humidity (between 36 and 100)</label>
+        <input type="text" id="ahum" name="ahum">
+        <br>
+      </div>
+      <div class="label">
+        <label for="awind">Average Wind Speed (between 1 and 20)</label>
+        <input type="text" id="awind" name="awind">
+        <br>
+      </div>
+      <div class="label">
+        <label for="prec">Precipitation?</label>
+        <select id="prec" name="prec">
+          <option value="0">No</option>
+          <option value="1">Yes</option>
+        </select>
+        <br>
+      </div>
+      <div class="label">
+        <label for="veh">Vehicle Type?</label>
+        <select id="veh" name="veh">
+          <option value="0">Scooter</option>
+          <option value="1">Bicycle</option>
+        </select>
+        <br>
+      </div>
+      <div class="label">
+        <label for="hourenc">Hour Group</label>
+        <select id="hourenc" name="hourenc">
+          <option value="0">Between Midnight and 3am</option>
+          <option value="1">Betwen 4am and 7am</option>
+          <option value="2">Betwen 8am and 11am</option>
+          <option value="3">Betwen Noon and 3pm</option>
+          <option value="4">Betwen 4pm and 7pm</option>
+          <option value="5">Betwen 8pm and 11pm</option>
+        </select>
+        <br>
+      </div>
+      <div class="label">
+        <label for="season">Quarter</label>
+        <select id="season" name="season">
+          <option value="0">Between January and March</option>
+          <option value="1">Between April and June</option>
+          <option value="1">Between July and September</option>
+          <option value="1">Between October and December</option>
+        </select>
+        <br>
+      </div>
+      <input id="submit" type="submit" value="Submit">
+    </form>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.5.0/d3.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+</body>
+
+</html>
