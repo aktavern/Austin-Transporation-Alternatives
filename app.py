@@ -165,6 +165,30 @@ def encoded(predicted_result):
     # return a more human-readable result
     return str(encoded_result[0][0])
 
+def variables(query_results):
+    # query database for encoded variables and return human-readable format
+    vehicle_encoded = (db.session.query(Vehicles.vehicle_type).filter(Vehicles.vehicle_encoded == query_results[9]).all()[0][0])
+    hour_encoded = (db.session.query(Hours.hour_group).filter(Hours.hour_encoded == query_results[10]).all()[0][0])
+    month_encoded = (db.session.query(Months.month_group).filter(Months.month_encoded == query_results[11]).all()[0][0])
+    
+    future_count = db.session.query(All_Vehicles.count).filter(All_Vehicles.day == query_results[0], 
+                All_Vehicles.month == query_results[2], All_Vehicles.year == query_results[3]).all()
+    
+    if future_count == []:
+        count = "None"
+    else:
+        count = (db.session.query(All_Vehicles.count).filter(All_Vehicles.day == query_results[0], 
+            All_Vehicles.month == query_results[2], All_Vehicles.year == query_results[3],
+            All_Vehicles.hour == query_results[4], All_Vehicles.vehicle_encoded == query_results[9]).all()[0][0])
+    
+    variables_list = []
+    variables_list.append(vehicle_encoded)
+    variables_list.append(hour_encoded)
+    variables_list.append(month_encoded)
+    variables_list.append(count)
+
+    return variables_list
+
 
 #################################################
 # Flask Routes
@@ -187,11 +211,20 @@ def result():
         form_data = list(map(int, form_data))
 
     query_results = cleanup(form_data)
+    variable_list = variables(query_results)
     to_predict_list = list(map(int,query_results))
     predicted_result = prediction(to_predict_list)
     encoded_result = encoded(predicted_result)
     
-    return render_template("result.html", prediction = encoded_result)
+    return render_template("result.html", prediction = encoded_result,
+    day = query_results[0], month = query_results[2], 
+    year = query_results[3], hour = query_results[4],
+    vehicletype = variable_list[0],dow=query_results[1],
+    atemp=query_results[5],ahum=query_results[6],
+    awind=query_results[7],prec=query_results[8],
+    hourg = variable_list[1], monthg = variable_list[2],
+    count = variable_list[3])
+
 
 if __name__ == "__main__":
     app.run()
