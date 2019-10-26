@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import numpy as np
 import pickle
+from datetime import datetime as dt
 
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy
@@ -32,7 +33,12 @@ Base = automap_base()
 # reflect the tables
 Base.prepare(engine, reflect=True)
 
-# save reference to the table
+# save reference to the tables
+All_Vehicles = Base.classes.all_vehicles
+Vehicles = Base.classes.vehicles
+Hours = Base.classes.hours
+Months = Base.classes.months
+Counts = Base.classes.counts
 Weather = Base.classes.weather
 
 # create our session from Python to the DB
@@ -42,7 +48,105 @@ session = Session(engine)
 # Functions
 #################################################
 
-# function to process data using pickle model
+# FUNCTION TO QUERY THE DATABASE FOR WEATHER INFORMATION TO COMPLETE 
+# THE DATA NEEDED FOR PREDICTIONS
+def cleanup(form_data):
+    
+    # convert inputs to strings and return values from database
+    date = str(form_data[2]) + "-" + str(form_data[1]) + "-" + str(form_data[0])
+    hour = str(form_data[3])
+    vehicle = str(form_data[4])
+    sel = [
+        All_Vehicles.day,
+        All_Vehicles.day_of_week,
+        All_Vehicles.month,
+        All_Vehicles.year,
+        All_Vehicles.hour,
+        All_Vehicles.atemp,
+        All_Vehicles.ahum,
+        All_Vehicles.awind,
+        All_Vehicles.prec,
+        All_Vehicles.vehicle_encoded,
+        All_Vehicles.hour_encoded,
+        All_Vehicles.month_encoded
+    ]
+    query_results = db.session.query(*sel).filter(All_Vehicles.date == date, 
+                                                All_Vehicles.hour == hour,
+                                                All_Vehicles.vehicle_encoded == vehicle).all()
+
+    # if query does not return any results, get averages for prediction
+    if query_results == []:
+
+        # get the day of week
+        date = dt.strptime(date,'%Y-%m-%d')
+        weekday = date.weekday()
+        
+        # get average weather data 
+        sql = """
+        select round(avg(atemp),0) AS atemp,
+        round(avg(ahum),0) AS ahum,
+        round(avg(awind),0) AS awind,
+        round(avg(prec),0) AS prec
+        from weather
+        where day = %s and month = %s
+        """
+        # use pandas to query the database using the above query
+        weather_query = pd.read_sql_query(sql,engine, params=[form_data[0],form_data[1]])
+        # convery query results to a list of integers
+        weather_query = weather_query.values[0].astype('int')
+
+        # convert hour to hour encoded 
+        if form_data[3] >= 0 and form_data[3] <= 3:
+            hour = 0
+        elif form_data[3] >= 4 and form_data[3] <= 7:
+            hour = 1 
+        elif form_data[3] >= 8 and form_data[3] <= 11:
+            hour = 2
+        elif form_data[3] >= 12 and form_data[3] <= 15:
+            hour = 3 
+        elif form_data[3] >= 16 and form_data[3] <= 19:
+            hour = 4 
+        else:
+            hour = 5 
+
+        # query the hour encoded table for prediction
+        hour_query = (session.query(Hours.hour_encoded).filter(Hours.hour_encoded == hour).all())[0][0]
+
+        if form_data[1] >= 1 and form_data[1] <= 3:
+            month = 0
+        elif form_data[1] >= 4 and form_data[1] <= 6:
+            month = 1
+        elif form_data[1] >= 7 and form_data[1] <= 9:
+            month = 2
+        else:
+            month = 3
+        
+        # query the hour encoded table for prediction
+        month_query = (session.query(Months.month_encoded).filter(Months.month_encoded == month).all())[0][0]
+
+        # create a new list using results from queries above in
+        # the order required for the prediction
+        query_results = []
+        query_results.append(form_data[0])
+        query_results.append(weekday)
+        query_results.append(form_data[1])
+        query_results.append(form_data[2])
+        query_results.append(form_data[3])
+        query_results.append(weather_query[0])
+        query_results.append(weather_query[1])
+        query_results.append(weather_query[2])
+        query_results.append(weather_query[3])
+        query_results.append(form_data[4])
+        query_results.append(hour_query)
+        query_results.append(month_query)
+    # if query does return results, just get those results
+    else:
+        query_results = query_results[0]
+    
+    return(query_results)
+
+
+# FUNCTION TO PROCESS THE PREDICTION LIST THROUGH PICKLE
 def prediction(to_predict_list):
     # make input the appropriate shape for pickle
     to_predict = np.array(to_predict_list).reshape(1,12)
@@ -51,6 +155,15 @@ def prediction(to_predict_list):
     # run prediction and return value
     result = loaded_model.predict(to_predict)
     return result[0]
+
+# FUNCTION TO RETURN A HUMAN READABLE COUNT RESULT
+def encoded(predicted_result):
+    # convert input to an integer
+    result = int(predicted_result)
+    # query database for result
+    encoded_result = db.session.query(Counts.count_group).filter(Counts.count_encoded == result).all()
+    # return a more human-readable result
+    return str(encoded_result[0][0])
 
 
 #################################################
@@ -64,56 +177,21 @@ def index():
 
 @app.route("/result", methods=['POST'])
 def result():
+    """Return the results from predictions."""
     if request.method == 'POST':
-        # Convert form data to a dictionary
-        to_predict_list = request.form.to_dict()
-        # Get only the values from the dictionary
-        to_predict_list = list(to_predict_list.values())
-        # Convert values from strings to integers
-        to_predict_list = list(map(int, to_predict_list))
-        result = prediction(to_predict_list)
+        # convert form data to a dictionary
+        form_data = request.form.to_dict()
+        # get only the values from the dictionary
+        form_data = list(form_data.values())
+        # convert values from strings to integers
+        form_data = list(map(int, form_data))
 
-    # check weather and day of week
-    date = str(to_predict_list[3]) + "-" + str(to_predict_list[2]) + "-" + str(to_predict_list[0])
-    sel = [
-        Weather.day_of_week,
-        Weather.atemp,
-        Weather.ahum,
-        Weather.awind,
-        Weather.prec,
-    ]
-    date_results = db.session.query(*sel).filter(Weather.date == date).all()
-    print(date_results[0][0])
-
-    # check vehicle type and grouped data 
-
-
-    # Return different feedback based on value of result
-    if int(result) == 0:
-        demand = 'LITTLE DEMAND: Demand will be between 1 and 435.'
-    elif int(result) == 1:
-        demand = 'VERY, VERY SLIGHT DEMAND: Demand will be between 436 and 869'
-    elif int(result) == 2:
-        demand = 'VERY SLIGHT DEMAND: Demand will be between 870 and 1304'
-    elif int(result) == 3:
-        demand = 'SLIGHT DEMAND: Demand will be between 1305 and 1738'
-    elif int(result) == 4:
-        demand = 'MODERATE DEMAND: will be between 1739 and 2171'
-    elif int(result) == 5:
-        demand = 'SOMEWHAT SEVERE DEMAND: will be between 2172 and 2607'
-    elif int(result) == 6:
-        demand = 'SEVERE DEMAND: Demand will be between 2608 and 3011'
-    elif int(result) == 7:
-        demand = 'MORE SEVERE DEMAND:Demand will be between 3012 and 3476'
-    elif int(result) == 8:
-        demand = 'VERY SEVERE DEMAND: Demand will be between 3477 and 3892'
-    elif int(result) == 9:
-        demand = 'VERY, VERY SEVERE DEMAND: Demand will be between 3892 and 4334'
-    else:
-        demand = 'EXTREME DEMAND: Demand will be over 4335!'
+    query_results = cleanup(form_data)
+    to_predict_list = list(map(int,query_results))
+    predicted_result = prediction(to_predict_list)
+    encoded_result = encoded(predicted_result)
     
-    return render_template("result.html", prediction = demand,
-        prediction_list = to_predict_list, date = date_results)
+    return render_template("result.html", prediction = encoded_result)
 
 if __name__ == "__main__":
     app.run()
