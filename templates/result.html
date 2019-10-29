@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Austin Micromobility</title>
+  <!-- Bootstrap -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+  <!-- Our CSS -->
+  <link rel="stylesheet" type="text/css" href="static/style.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <nav class="navbar navbar-inverse navbar-static-top">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Austin Micromobility</a>
+          </div>
+          <div class="collapse navbar-collapse" id="navbar">
+            <ul class="nav navbar-nav">
+              <li class="dropdown">
+                <li><a href="/">Home</a></li>
+                <li><a href="data.html">Data Analysis</a></li>
+                <li><a href="machine.html">Machine Learning</a></li>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h2>Results</h2>
+        </div>
+        <div class="col-md-12">
+            <p>The model uses day, day of week, month, year, hour, average temperature,
+                average humidity, average wind speed, precipitation (true/false), 
+                vehicle type, hour encoded, and month encoded. 
+                <br><br>
+                If a user inputs a date in the future, the app queries the backend
+                database for a historical average of the temperature, humidity, wind speed,
+                and precipitation for that date. It then merges those averages
+                back into the user-provided variables to predict demand for that vehicle
+                within those parameters.
+                <br><br>
+            </p>
+        </div>
+    </div>
+    <div class="row display-flex">
+      <div class="col-md-6">
+        <div class="thumbnail">
+          <img src="static/result_1.jpg" height="300px" width="100%">
+          <div class="caption">
+            <h2>Predicted Demand for {{vehicletpye}}: {{prediction}}</h2>
+            <p><i>Demand can vary between 0 and 4335.</i>
+              <p>Based on your inputs of:
+              <ul>
+                <li>Day: {{day}}</li>
+                <li>Month: {{month}}</li>
+                <li>Year: {{year}}</li>
+                <li>Hour: {{hour}}</li>
+              </ul>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="thumbnail">
+          <img src="static/result_2.jpg" height="300px" width="100%">
+          <div class="caption">
+            <h2>Actual Demand (if exists): {{count}}</h2>
+            <p>Based on the determined variables of:
+              <ul>
+                <li>Day of Week: {{dow}}</li>
+                <li>Average Temperature (F): {{atemp}}</li>
+                <li>Average Humidity (%): {{ahum}}</li>
+                <li>Average Wind Speed (MPH): {{awind}}</li>
+                <li>Precipitation (0 or 1): {{prec}}</li>
+                <li>Hour Group: {{hourg}}</li>
+                <li>Month Group: {{monthg}}</li>
+              </ul>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>   
+    <div class="row">
+      <div class="col-md-12 text-center">
+        <br>
+        <p><a href="machine.html" class="btn btn-primary" role="button">Try Again!</a></p>
+      </div>
+    </div>
+</div>
+</body>
