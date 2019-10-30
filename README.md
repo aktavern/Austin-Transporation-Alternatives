@@ -15,6 +15,9 @@ scooters or bicycles on a given day and time with 90% accuracy.
 * https://www.wunderground.com/history/monthly/us/tx/austin/KAUS/
 * https://data.austintexas.gov/Transportation-and-Mobility/Shared-Micromobility-Vehicle-Trips/7d8e-dm7r
 
+# Data Model
+![Data Model](datamodel.png)
+
 # How to Set Up
 1. Create a micromobility database in your local Postgres and use the `etl/sql statements.txt` to create the necessary columns and tables necessary. 
 2. Run the `data/Data Cleanup.ipynb` notebook to clean up and combine the data. 
