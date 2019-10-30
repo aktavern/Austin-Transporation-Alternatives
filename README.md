@@ -11,6 +11,10 @@ There are over 15,500 dockless scooters and 2,500 bicycles in the city of Austin
 the bounds a company provides. This project analyzes the data behind the trips taken on these vehicles in combination with historical weather data. It then provides a Decision Tree Regression model which can be used to predict a range of demand for 
 scooters or bicycles on a given day and time with 90% accuracy. 
 
+# Project Presentation
+The presentation can be viewed here:
+https://docs.google.com/presentation/d/1Cxi_sE-L9v6SiM5DtS3tOglHEhsxOJUdqmgIBqXVMEs/edit?usp=sharing
+
 # Data Sources
 * https://www.wunderground.com/history/monthly/us/tx/austin/KAUS/
 * https://data.austintexas.gov/Transportation-and-Mobility/Shared-Micromobility-Vehicle-Trips/7d8e-dm7r
